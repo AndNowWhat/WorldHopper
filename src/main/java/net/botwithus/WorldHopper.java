@@ -61,6 +61,7 @@ public class WorldHopper extends LoopingScript {
 
     @Override
     public void onLoop() {
+    	this.loopDelay = 600;
         checkAndExecuteTasks();
 
         if (checkPlayerInRange && isPlayerWithinRange(playerCheckRange)) {
