@@ -258,16 +258,21 @@ public class WorldHopper extends LoopingScript {
         hopWorld(task.getTargetWorld());
 
         if (task.getScriptName() != null) {
-            setActiveScript(task.getScriptName(), true);
-            boolean activated = ScriptController.getActiveScript() != null 
-                                && ScriptController.getActiveScript().getName().equals(task.getScriptName()) 
-                                && ScriptController.getActiveScript().isActive();
-            
-            if (activated) {
-                addLogMessage("Script " + task.getScriptName() + " activated successfully.");
+            ImmutableScript currentActiveScript = ScriptController.getActiveScript();
+            if (currentActiveScript != null && currentActiveScript.getName().equals(task.getScriptName()) && currentActiveScript.isActive()) {
+                addLogMessage("Script " + task.getScriptName() + " is already active.");
             } else {
-                addLogMessage("Failed to activate script: " + task.getScriptName() + " after hopping.");
-                return;
+                setActiveScript(task.getScriptName(), true);
+                boolean activated = ScriptController.getActiveScript() != null 
+                                    && ScriptController.getActiveScript().getName().equals(task.getScriptName()) 
+                                    && ScriptController.getActiveScript().isActive();
+                
+                if (activated) {
+                    addLogMessage("Script " + task.getScriptName() + " activated successfully.");
+                } else {
+                    addLogMessage("Failed to activate script: " + task.getScriptName() + " after hopping.");
+                    return;
+                }
             }
         }
 
@@ -277,6 +282,7 @@ public class WorldHopper extends LoopingScript {
             worldHopTasks.get(0).start();
         }
     }
+
 
     private boolean setActiveScript(String name, boolean active) {
         ImmutableScript script = ScriptController.getScripts().stream()
