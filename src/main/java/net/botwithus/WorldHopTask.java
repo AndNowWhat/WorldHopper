@@ -1,15 +1,15 @@
 package net.botwithus;
 
-import java.util.*;
-
 public class WorldHopTask {
     private int delayMinutes;
     private long startTime;
     private int targetWorld;
+    private String scriptName;
 
-    public WorldHopTask(int delayMinutes, int targetWorld) {
+    public WorldHopTask(int delayMinutes, int targetWorld, String scriptName) { 
         this.delayMinutes = delayMinutes;
         this.targetWorld = targetWorld;
+        this.scriptName = scriptName;
         this.startTime = -1;
     }
 
@@ -19,6 +19,10 @@ public class WorldHopTask {
 
     public int getTargetWorld() {
         return targetWorld;
+    }
+
+    public String getScriptName() {  
+        return scriptName;
     }
 
     public boolean isTimeToHop() {
