@@ -63,4 +63,8 @@ public class WorldHopTask {
     public void resetStartTime() {
         this.startTime = System.currentTimeMillis();
     }
+
+    public long getStartTime() {
+        return startTime;
+    }
 }

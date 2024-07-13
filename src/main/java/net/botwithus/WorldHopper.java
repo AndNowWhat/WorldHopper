@@ -92,30 +92,47 @@ public class WorldHopper extends LoopingScript {
         updateCombatState();
         checkAndExecuteTasks();
 
-        if (checkPlayerInRange && isPlayerWithinRange(playerCheckRange)) {
-            hopToNextWorld();
-        }
-
-        if (hopOnPlayerMod && isPlayerModNearby()) {
-            hopToNextWorld();
-        }
-        
         int currentRegionId = Client.getLocalPlayer().getCoordinate().getRegionId();
         addLogMessage("Current region ID: " + currentRegionId);
+
+        if (!isInSpecialArea(currentRegionId) && !inCombat && (worldHopTasks.isEmpty() || inCombat)) {
+            if (checkPlayerInRange && isPlayerWithinRange(playerCheckRange)) {
+                hopToNextWorld();
+            }
+
+            if (hopOnPlayerMod && isPlayerModNearby()) {
+                hopToNextWorld();
+            }
+        } else if (isInSpecialArea(currentRegionId)) {
+            addLogMessage("Player is in a special region. Skipping world hop.");
+        }
     }
 
     private void checkAndExecuteTasks() {
         if (!worldHopTasks.isEmpty() && !inCombat) {
             WorldHopTask currentTask = worldHopTasks.get(0);
+            int currentRegionId = Client.getLocalPlayer().getCoordinate().getRegionId();
+
+            if (isInSpecialArea(currentRegionId)) {
+                addLogMessage("Player is in a special region. Delaying world hop.");
+                return;
+            }
+
+            if (currentTask.getStartTime() == -1) {
+                currentTask.start();
+            }
+
             if (currentTask.isTimeToHop()) {
                 addLogMessage("Task delay reached. Preparing to hop world to " + currentTask.getTargetWorld());
                 prepareForWorldHop(currentTask);
+            } else {
+                long remainingTime = (currentTask.getStartTime() + currentTask.getDelayMinutes() * 60 * 1000 - System.currentTimeMillis()) / 1000;
+                addLogMessage("Time remaining for next hop: " + remainingTime + " seconds.");
             }
         } else if (inCombat) {
             addLogMessage("Player is in combat. Delaying world hop.");
         }
     }
-
 
     private boolean isPlayerModNearby() {
         Coordinate playerCoordinate = Client.getLocalPlayer().getCoordinate();
@@ -176,11 +193,8 @@ public class WorldHopper extends LoopingScript {
         WorldHopTask newTask = new WorldHopTask(delayMinutes, targetWorld, scriptName);
         worldHopTasks.add(newTask);
         addLogMessage("Added new world hop task with a delay of " + delayMinutes + " minutes to world " + targetWorld + " running script " + (scriptName != null ? scriptName : "none"));
-
-        if (worldHopTasks.size() == 1) {
-            worldHopTasks.get(0).start();
-        }
     }
+
 
     public void removeWorldHopTask(WorldHopTask task) {
         if (worldHopTasks.remove(task)) {
