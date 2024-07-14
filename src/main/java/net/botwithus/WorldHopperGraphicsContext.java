@@ -102,11 +102,11 @@ public class WorldHopperGraphicsContext extends ScriptGraphicsContext {
             ImGui.Text("Currently Active Script: " + (activeScript != null ? activeScript.getName() : "None"));
 
             ImGui.Separator();
-            ImGui.Text("Log");
-            for (String log : script.getLogMessages()) {
-                ImGui.Text(log);
-            }
-            script.manageLogSize();
+           //ImGui.Text("Log");
+           //for (String log : script.getLogMessages()) {
+           //     ImGui.Text(log);
+           // }
+           // script.manageLogSize();
 
             ImGui.End();
         }
