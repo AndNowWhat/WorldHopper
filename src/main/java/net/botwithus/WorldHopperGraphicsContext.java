@@ -2,18 +2,18 @@ package net.botwithus;
 
 import net.botwithus.rs3.imgui.ImGui;
 import net.botwithus.rs3.imgui.ImGuiWindowFlag;
-import net.botwithus.rs3.imgui.NativeInteger;
 import net.botwithus.rs3.script.ScriptConsole;
 import net.botwithus.rs3.script.ScriptGraphicsContext;
 import net.botwithus.rs3.script.ScriptController;
 import net.botwithus.rs3.script.ImmutableScript;
+
 public class WorldHopperGraphicsContext extends ScriptGraphicsContext {
 
     private WorldHopper script;
     private int newTaskDelayMinutes = 0;
     private int targetWorld = 1;
-    private NativeInteger selectedScriptIndex = new NativeInteger(-1);
-    private boolean hopF2PWorlds = false; 
+    private int selectedScriptIndex = -1;
+    private boolean hopF2PWorlds = false;
     private boolean hopP2PWorlds = true;
 
     public WorldHopperGraphicsContext(ScriptConsole scriptConsole, WorldHopper script) {
@@ -29,7 +29,6 @@ public class WorldHopperGraphicsContext extends ScriptGraphicsContext {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 1.0f);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, 10.0f, 10.0f);
 
-        // Set colors for a professional dark theme
         ImGui.PushStyleColor(ImGuiCol.WindowBg, 0.1f, 0.1f, 0.1f, 1.0f);
         ImGui.PushStyleColor(ImGuiCol.FrameBg, 0.2f, 0.2f, 0.2f, 1.0f);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, 0.3f, 0.3f, 0.3f, 1.0f);
@@ -44,8 +43,8 @@ public class WorldHopperGraphicsContext extends ScriptGraphicsContext {
         ImGui.PushStyleColor(ImGuiCol.Text, 0.9f, 0.9f, 0.9f, 1.0f);
         ImGui.PushStyleColor(ImGuiCol.TextDisabled, 0.5f, 0.5f, 0.5f, 1.0f);
         ImGui.PushStyleColor(ImGuiCol.Border, 0.3f, 0.3f, 0.3f, 1.0f);
-        
-        if (ImGui.Begin("World Hopper Task Scheduler", ImGuiWindowFlag.None.getValue())) {
+
+        if (ImGui.Begin("World Hopper Task Scheduler", ImGuiWindowFlag.AlwaysAutoResize.getValue())) {
             ImGui.Text("Settings");
             ImGui.Separator();
 
@@ -56,57 +55,50 @@ public class WorldHopperGraphicsContext extends ScriptGraphicsContext {
             int playerCheckRange = script.getPlayerCheckRange();
             playerCheckRange = ImGui.InputInt("Player Check Range (tiles)", playerCheckRange);
             script.setPlayerCheckRange(playerCheckRange);
-            
+
             hopF2PWorlds = ImGui.Checkbox("Hop to F2P Worlds", hopF2PWorlds);
             hopP2PWorlds = ImGui.Checkbox("Hop to P2P Worlds", hopP2PWorlds);
-            
             script.setHopF2PWorlds(hopF2PWorlds);
             script.setHopP2PWorlds(hopP2PWorlds);
 
+            script.minAllowedPlayers = ImGui.InputInt("Min Allowed Players in World",  script.minAllowedPlayers);
+            script.maxAllowedPlayers = ImGui.InputInt("Max Allowed Players in World",  script.maxAllowedPlayers);
+
+            script.minPing = ImGui.InputInt("Min Allowed Ping", script.minPing);
+            script.maxPing = ImGui.InputInt("Max Allowed Ping", script.maxPing);
+
             ImGui.Separator();
-            
+
             boolean hopOnPlayerMod = script.isHopOnPlayerMod();
             hopOnPlayerMod = ImGui.Checkbox("Hop on Player Mod (40 tiles check)", hopOnPlayerMod);
             script.setHopOnPlayerMod(hopOnPlayerMod);
-            
+
             ImGui.Separator();
 
             ImGui.Text("Add World Hop Task");
             newTaskDelayMinutes = ImGui.InputInt("Task Delay (minutes)", newTaskDelayMinutes);
             targetWorld = ImGui.InputInt("Target World", targetWorld);
 
-            String[] scriptNames = script.getScriptNames();
-            String[] comboItems = new String[scriptNames.length + 1];
-            comboItems[0] = "No Script";
-            System.arraycopy(scriptNames, 0, comboItems, 1, scriptNames.length);
-            ImGui.Combo("Select Script", selectedScriptIndex, comboItems);
-
             if (ImGui.Button("Add Task")) {
-                String selectedScriptName = selectedScriptIndex.get() == 0 ? null : scriptNames[selectedScriptIndex.get() - 1];
-                script.addWorldHopTask(newTaskDelayMinutes, targetWorld, selectedScriptName);
+                script.addWorldHopTask(newTaskDelayMinutes, targetWorld);
             }
 
             ImGui.Separator();
 
             ImGui.Text("Upcoming World Hop Tasks:");
             for (WorldHopTask task : script.getWorldHopTasks()) {
-                ImGui.Text("World hop in " + task.getRemainingTime() + " to world " + task.getTargetWorld() + " running script " + (task.getScriptName() != null ? task.getScriptName() : "none"));
+                ImGui.Text("World hop in " + task.getRemainingTime() + " to world " + task.getTargetWorld());
                 if (ImGui.Button("Remove Task##" + task.hashCode())) {
                     script.removeWorldHopTask(task);
                 }
             }
-            
+
             ImGui.Separator();
-            
+
             ImmutableScript activeScript = ScriptController.getActiveScript();
             ImGui.Text("Currently Active Script: " + (activeScript != null ? activeScript.getName() : "None"));
 
             ImGui.Separator();
-           //ImGui.Text("Log");
-           //for (String log : script.getLogMessages()) {
-           //     ImGui.Text(log);
-           // }
-           // script.manageLogSize();
 
             ImGui.End();
         }
@@ -119,8 +111,8 @@ public class WorldHopperGraphicsContext extends ScriptGraphicsContext {
     public void drawOverlay() {
         super.drawOverlay();
     }
-    
-    public class ImGuiCol {
+
+public class ImGuiCol {
         public static final int Text = 0;
         public static final int TextDisabled = 1;
         public static final int WindowBg = 2;

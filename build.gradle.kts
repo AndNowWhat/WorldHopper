@@ -35,7 +35,7 @@ tasks.withType<JavaExec> {
 }
 
 dependencies {
-    implementation("net.botwithus.rs3:botwithus-api:1.0.0-SNAPSHOT")
+    implementation("net.botwithus.rs3:botwithus-api:1.0.0-20240912.031711-30")
     implementation("net.botwithus.xapi.public:api:1.0.0-SNAPSHOT")
     "includeInJar"("net.botwithus.xapi.public:api:1.0.0-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
